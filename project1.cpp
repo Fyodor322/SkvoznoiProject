@@ -18,9 +18,9 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -33,7 +33,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Выполнить инициализацию приложения:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -52,7 +52,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
 
@@ -68,17 +68,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJECT1));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PROJECT1);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJECT1));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_PROJECT1);
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
@@ -95,24 +95,43 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
 int Racing_x = 0;
 int Racing_y = 0;
+
+int koorRacing_x = Racing_x + 120;
+int koorRacing_y = Racing_y + 135;
+
+int koorFuel_x = 861;
+int koorFuel_y = 219;
+
+int Refueled() {
+    if (koorRacing_x - 80 < koorFuel_x
+        && koorRacing_x + 80 > koorFuel_x
+        && koorRacing_y - 130 < koorFuel_y
+        && koorRacing_y + 130 > koorFuel_y) {
+
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
 
 void DrawWeel(HDC hdc, int x, int y, int x1, int y1)
 {
@@ -148,9 +167,10 @@ void DrawRacingCar(HDC hdc, int x, int y)
     HPEN hPen;
     hBrush = CreateSolidBrush(RGB(237, 28, 36));        //кузов
     SelectObject(hdc, hBrush);
-    RECT rect = { 120 + x, 90 + y, 160 + x, 210 + y }; 
+    RECT rect = { 120 + x, 90 + y, 160 + x, 210 + y };
     FillRect(hdc, &rect, hBrush);
 
+    //координаты (80, 60, 160, 210)
 
     SelectObject(hdc, hBrush);
     rect = { 80 + x, 60 + y, 200 + x, 90 + y };         //переднее антикрыло
@@ -293,7 +313,7 @@ void DrawCar(HDC hdc, int x, int y)
     LineTo(hdc, 404 + x, 96 + y);
     MoveToEx(hdc, 371 + x, 95 + y, 0);
     LineTo(hdc, 401 + x, 95 + y);
-    
+
     HPEN hPen2 = CreatePen(PS_SOLID, 1, RGB(153, 217, 234));
     SelectObject(hdc, hPen2);
     MoveToEx(hdc, 353 + x, 112 + y, 0);
@@ -356,10 +376,10 @@ void DrawRam(HDC hdc, int x, int y)
     Polygon(hdc, pt1, 4);
 
     POINT pt[4];
-    pt[0].x = 586+20 + x;
-    pt[1].x = 586+20 + x;
-    pt[2].x = 594+20 + x;                      //правая ручка
-    pt[3].x = 594+20 + x;
+    pt[0].x = 586 + 20 + x;
+    pt[1].x = 586 + 20 + x;
+    pt[2].x = 594 + 20 + x;                      //правая ручка
+    pt[3].x = 594 + 20 + x;
 
     pt[0].y = 100 + y;
     pt[1].y = 148 + y;
@@ -396,8 +416,8 @@ void DrawRam(HDC hdc, int x, int y)
     SelectObject(hdc, hBrush1);
     POINT pt2[11];
     pt2[0].x = 558 + x;
-    pt2[1].x = 558+8 + x;
-    pt2[2].x = 558 + 8*2 + x;
+    pt2[1].x = 558 + 8 + x;
+    pt2[2].x = 558 + 8 * 2 + x;
     pt2[3].x = 558 + 8 * 3 + x;
     pt2[4].x = 558 + 8 * 4 + x;
     pt2[5].x = 558 + 8 * 5 + x;
@@ -406,7 +426,7 @@ void DrawRam(HDC hdc, int x, int y)
     pt2[8].x = 558 + 8 * 8 + x;
     pt2[9].x = 558 + 8 * 9 + x;
     pt2[10].x = 558 + 8 * 10 + x;
-                                        //шипы
+    //шипы
     pt2[0].y = 177 + y;
     pt2[1].y = 192 + y;
     pt2[2].y = 177 + y;
@@ -455,7 +475,9 @@ void DrawFuel(HDC hdc, int x, int y)
     HPEN hPen1 = CreatePen(PS_SOLID, 1, RGB(127, 127, 127));
     HPEN hPen2 = CreatePen(PS_SOLID, 1, RGB(142, 28, 36));
     HBRUSH hBrush = CreateSolidBrush(RGB(255, 127, 39));
-    
+
+    //координаты всей бочки (822, 156, 901, 283)
+
     SelectObject(hdc, hPen);
     Ellipse(hdc, 822 + x, 156 + y, 902 + x, 187 + y);   //обод бочки
 
@@ -470,8 +492,8 @@ void DrawFuel(HDC hdc, int x, int y)
     pt[1].x = 827 + x;
     pt[2].x = 896 + x;
     pt[3].x = 896 + x;
-                                    //заливка корпуса
-    pt[0].y = 190 + y; 
+    //заливка корпуса
+    pt[0].y = 190 + y;
     pt[1].y = 278 + y;
     pt[2].y = 278 + y;
     pt[3].y = 190 + y;
@@ -480,11 +502,11 @@ void DrawFuel(HDC hdc, int x, int y)
     SelectObject(hdc, hPen1);
 
     int x1 = 896 + x, x2 = 901 - 27 + x, yf = 189 + y;
-    while (yf>=183 + y)
+    while (yf >= 183 + y)
     {
-        MoveToEx(hdc, x1, yf, 0);            
+        MoveToEx(hdc, x1, yf, 0);
         LineTo(hdc, x2, yf);
-        x2+=2;
+        x2 += 2;
         yf--;
     }           //дозаливка справа
 
@@ -493,8 +515,8 @@ void DrawFuel(HDC hdc, int x, int y)
     x1 = 896 + x, x2 = 901 - 27 + x, yf = 189 + y;
     while (yf >= 183 + y)
     {
-        MoveToEx(hdc, x1-48, yf, 0);
-        LineTo(hdc, x2-48, yf);
+        MoveToEx(hdc, x1 - 48, yf, 0);
+        LineTo(hdc, x2 - 48, yf);
         x1 -= 2;
         yf--;
     }       //дозаливка слева
@@ -506,7 +528,6 @@ void DrawFuel(HDC hdc, int x, int y)
     RECT rect5 = { 868 + x, 227 + y, 868 - 3 + x, 227 - 3 + y };
     RECT rect6 = { 852 + x, 237 + y, 865 + x, 222 + y };
     RECT rect7 = { 855 + x, 222 + y, 865 + x, 217 + y };
-    RECT rect8 = { 857 + x, 217 + y, 863 + x, 211 + y };
 
     FillRect(hdc, &rect1, hBrush);
     FillRect(hdc, &rect2, hBrush);
@@ -515,7 +536,6 @@ void DrawFuel(HDC hdc, int x, int y)
     FillRect(hdc, &rect5, hBrush);
     FillRect(hdc, &rect6, hBrush);
     FillRect(hdc, &rect7, hBrush);
-    FillRect(hdc, &rect8, hBrush);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -527,59 +547,73 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         case VK_LEFT:
             Racing_x -= 10;
+            koorRacing_x -= 10;
+            if (Refueled()) {
+                PostQuitMessage(0);
+            }
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_RIGHT:
             Racing_x += 10;
+            koorRacing_x += 10;
+
+            if (Refueled()) 
+                PostQuitMessage(0);
+            
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_DOWN:
             Racing_y += 10;
+            koorRacing_y += 10;
+            if (Refueled()) {
+                PostQuitMessage(0);
+            }
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_UP:
             Racing_y -= 10;
+            koorRacing_y -= 10;
+            if (Refueled()) {
+                PostQuitMessage(0);
+            }
             InvalidateRect(hWnd, 0, 1);
             break;
         }
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // Разобрать выбор в меню:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
+    }
+    break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            DrawRacingCar(hdc, Racing_x, Racing_y);
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        DrawRacingCar(hdc, Racing_x, Racing_y);
 
-            DrawCar(hdc,0,0);
-            DrawCar(hdc, 0, 300);
+        DrawCar(hdc, 0, 0);
 
-            DrawRam(hdc, 0,300);
-            DrawRam(hdc, 0, 0);
+        DrawRam(hdc, 0, 0);
 
-            DrawWrench(hdc, 0,300);
-            DrawWrench(hdc, 0, 0);
+        DrawWrench(hdc, 0, 0);
 
-            DrawFuel(hdc, 0,300);
-            DrawFuel(hdc, 0, 0);
-            
-            EndPaint(hWnd, &ps);
-        }
-        break;
+        
+        DrawFuel(hdc, 0, 0);
+
+        EndPaint(hWnd, &ps);
+    }
+    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -608,3 +642,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+
