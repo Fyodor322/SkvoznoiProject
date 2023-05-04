@@ -1,17 +1,15 @@
-﻿// project1.cpp : Определяет точку входа для приложения.
-//
-
-#include "framework.h"
+﻿#include "framework.h"
 #include "project1.h"
+#include <time.h>
 
 #define MAX_LOADSTRING 100
 
-// Глобальные переменные:
-HINSTANCE hInst;                                // текущий экземпляр
-WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
-WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
 
-// Отправить объявления функций, включенных в этот модуль кода:
+HINSTANCE hInst;                                
+WCHAR szTitle[MAX_LOADSTRING];                  
+WCHAR szWindowClass[MAX_LOADSTRING];            
+
+
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -25,14 +23,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Разместите код здесь.
-
-    // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_PROJECT1, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
-    // Выполнить инициализацию приложения:
     if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
@@ -42,7 +36,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    // Цикл основного сообщения:
+
     while (GetMessage(&msg, nullptr, 0, 0))
     {
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -57,11 +51,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-//
-//  ФУНКЦИЯ: MyRegisterClass()
-//
-//  ЦЕЛЬ: Регистрирует класс окна.
-//
+
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -83,19 +73,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
-//
-//   ЦЕЛЬ: Сохраняет маркер экземпляра и создает главное окно
-//
-//   КОММЕНТАРИИ:
-//
-//        В этой функции маркер экземпляра сохраняется в глобальной переменной, а также
-//        создается и выводится главное окно программы.
-//
+
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+    hInst = hInstance; 
 
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
@@ -111,26 +92,107 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     return TRUE;
 }
 
-int Racing_x = 0;
+
+#define NUM_FUEL 12 //кол-во бочек с топливом
+#define NUM_WRENCHE 3 //кол-во гаечных ключей
+
+int WrencheX[NUM_WRENCHE] = { 0,0,0 };  //массив +координатов гаечных ключей
+int WrencheY[NUM_WRENCHE] = { 0,150,300 };
+int WrencheVisible[NUM_WRENCHE] = { 1,1,1 };    //видимость гаечных ключей
+
+int KoorWrenchX[NUM_WRENCHE]; //= 750;  // ширина = 27 
+int KoorWrenchY[NUM_WRENCHE]; //= 126;  // длина = 85
+
+int FuelX[NUM_FUEL] = { 0, 50, 150,   200, 250, 300,    0, 50, 150,   200, 250, 300 };
+int FuelY[NUM_FUEL] = { 0, 0, 0,   0, 0, 0,      100, 100, 100,   100, 100, 100 };  //+ к корординатам бочки с топливом
+int FuelVisible[NUM_FUEL] = { 1,1,1,    1,1,1,    1,1,1,     1,1,1 };   //видимость бочек с топливом
+
+int KoorFuelX[NUM_FUEL];    //реальные координаты бочек с топливом
+int KoorFuelY[NUM_FUEL];
+
+int Racing_x = 0;   //+ к координатам гоночной машины
 int Racing_y = 0;
 
-int koorRacing_x = Racing_x + 120;
+int koorRacing_x = Racing_x + 120;      //реальные координаты гоночной иашины
 int koorRacing_y = Racing_y + 135;
 
-int koorFuel_x = 861;
-int koorFuel_y = 219;
+int Car_x = 0;      //+ к координатам машины(врага)
+int Car_y = 0;
 
-int Refueled() {
-    if (koorRacing_x - 80 < koorFuel_x
-        && koorRacing_x + 80 > koorFuel_x
-        && koorRacing_y - 130 < koorFuel_y
-        && koorRacing_y + 130 > koorFuel_y) {
+int koorCar_x = Car_x + 386;    //реальные координаты машины (врага)
+int koorCar_y = Car_y + 125;
 
-        return 1;
+int RacingCarHelth = 3;     //счётчик жизней
+
+
+
+void Refueled() {
+
+    for (int i = 0; i < NUM_FUEL; i++)
+    {
+        KoorFuelX[i] = 882 + FuelX[i];
+        KoorFuelY[i] = 198 + FuelY[i];          //заполнение массива с координатами бочки с топливом
     }
-    else {
-        return 0;
+
+    for (int i = 0; i < NUM_FUEL; i++) {
+
+        if (FuelVisible[i]) {
+
+            if (koorRacing_x - 60 < KoorFuelX[i]
+                && koorRacing_x + 60 > KoorFuelX[i]
+                && koorRacing_y - 83 < KoorFuelY[i]
+                && koorRacing_y + 83 > KoorFuelY[i]) {
+
+                FuelVisible[i] = 0;
+               
+            }
+        }
     }
+}   //если гоночная машина пересекает бочку с топливом, то  
+void Repair() {
+    for (int i = 0; i < NUM_WRENCHE; i++)
+    {
+        KoorWrenchX[i] = WrencheX[i] + 750;
+        KoorWrenchY[i] = WrencheY[i] + 126;
+    }
+
+    for (int i = 0; i < NUM_WRENCHE; i++) {
+
+        if (WrencheVisible[i]) {
+
+            if (koorRacing_x - 27 < KoorWrenchX[i]
+                && koorRacing_x + 27 > KoorWrenchX[i]
+                && koorRacing_y - 85 < KoorWrenchY[i]
+                && koorRacing_y + 85 > KoorWrenchY[i]) {
+
+                WrencheVisible[i] = 0;
+                RacingCarHelth++;
+            }
+        }
+    }
+}
+void TryToEatRacingCar() {
+    if (koorRacing_x - 77 < koorCar_x
+        && koorRacing_x + 77 > koorCar_x
+        && koorRacing_y - 153 < koorCar_y
+        && koorRacing_y + 153 > koorCar_y) {
+
+        RacingCarHelth--;
+    }
+}//если гоночная машина встречается с обычной, то отнимается 1 здоровье
+
+void RandomMoveCar() {
+    int dx = rand() % 41 - 20;
+    int dy = rand() % 41 - 20;
+
+    Car_x += dx;
+    Car_y += dy;
+}//рандомное перемещение машины
+int CountVisibleFuel() {
+    int count = 0;
+    for (int i = 0; i < NUM_FUEL; i++)
+        count += FuelVisible[i];
+    return count;
 }
 
 void DrawWeel(HDC hdc, int x, int y, int x1, int y1)
@@ -160,6 +222,7 @@ void DrawWeel(HDC hdc, int x, int y, int x1, int y1)
     pt[8].y = 92 + y + y1;
 
     Polygon(hdc, pt, 9);
+    DeleteObject(hBrush);
 }
 void DrawRacingCar(HDC hdc, int x, int y)
 {
@@ -221,12 +284,19 @@ void DrawRacingCar(HDC hdc, int x, int y)
     DrawWeel(hdc, -90, 0, x, y);                    //колёса
     DrawWeel(hdc, 0, 118, x, y);
     DrawWeel(hdc, -90, 118, x, y);
-}
 
+    DeleteObject(hBrush);
+    DeleteObject(hPen);
+    DeleteObject(hBrush2);
+}
 void DrawCar(HDC hdc, int x, int y)
 {
     HBRUSH hBrush = CreateSolidBrush(RGB(63, 72, 204));
     SelectObject(hdc, hBrush);
+
+    //координаты всей машины: (348, 48, 425, 201)
+    //вы ширину - 386
+    //в длину - 125
 
     POINT pt[10];
     pt[0].x = 362 + x;
@@ -352,6 +422,13 @@ void DrawCar(HDC hdc, int x, int y)
         x1++;
         x2--;
     }
+
+    DeleteObject(hBrush);
+    DeleteObject(hPen);
+    DeleteObject(hBrushs);
+    DeleteObject(hBrush2);
+    DeleteObject(hBrush3);
+    DeleteObject(hPen2);
 }
 void DrawRam(HDC hdc, int x, int y)
 {
@@ -440,34 +517,42 @@ void DrawRam(HDC hdc, int x, int y)
     pt2[10].y = 177 + y;
 
     Polygon(hdc, pt2, 11);
+
+    DeleteObject(hBrush2);
+    DeleteObject(hBrush);
+    DeleteObject(hPen);
+    DeleteObject(hBrush1);
 }
 void DrawWrench(HDC hdc, int x, int y)
 {
     HBRUSH hBrush1 = CreateSolidBrush(RGB(127, 127, 127)); //серая
     HPEN hPen = CreatePen(PS_SOLID, 5, RGB(0, 0, 0));
 
-    SelectObject(hdc, hPen);                            //головка 
-    Arc(hdc, 729 + x, 66 + y, 766 + x, 109 + y, 730 + x, 93 + y, 752 + x, 67 + y);
-    MoveToEx(hdc, 730 + x, 91 + y, 0);
-    LineTo(hdc, 750 + x, 91 + y);
-    LineTo(hdc, 750 + x, 66 + y);
+    //координаты ключа (737, 84, 764, 169)
 
-    MoveToEx(hdc, 739 + x, 108 + y, 0);
-    LineTo(hdc, 739 + x, 176 + y);
-    LineTo(hdc, 741 + x, 184 + y);                      //ручка
-    LineTo(hdc, 753 + x, 184 + y);
-    LineTo(hdc, 756 + x, 176 + y);
+    SelectObject(hdc, hPen);                            //головка 
+    Arc(hdc, 737 + x, 84 + y, 764 + x, 109 + y, 736 + x, 99 + y, 758 + x, 73 + y);
+    MoveToEx(hdc, 740 + x, 98 + y, 0);
+    LineTo(hdc, 753 + x, 98 + y);
+    LineTo(hdc, 753 + x, 85 + y);
+
+    MoveToEx(hdc, 745 + x, 108 + y, 0);
+    LineTo(hdc, 745 + x, 161 + y);
+    LineTo(hdc, 745 + x, 169 + y);                      //ручка
+    LineTo(hdc, 753 + x, 169 + y);
+    LineTo(hdc, 756 + x, 161 + y);
     LineTo(hdc, 756 + x, 108 + y);
 
-    Ellipse(hdc, 744 + x, 169 + y, 752 + x, 179 + y);       //крючок
+    Ellipse(hdc, 747 + x, 159 + y, 755 + x, 164 + y);       //крючок
 
-    MoveToEx(hdc, 729 + x, 83 + y, 0);
-    LineTo(hdc, 743 + x, 74 + y);
-    LineTo(hdc, 743 + x, 70 + y);
-    LineTo(hdc, 741 + x, 68 + y);
-    LineTo(hdc, 731 + x, 68 + y);
-    LineTo(hdc, 729 + x, 71 + y);
-    LineTo(hdc, 729 + x, 83 + y);
+    MoveToEx(hdc, 737 + x, 92 + y, 0);
+    LineTo(hdc, 747 + x, 85 + y);
+    LineTo(hdc, 737 + x, 85 + y);
+    LineTo(hdc, 737 + x, 92 + y);
+ 
+
+    DeleteObject(hBrush1);
+    DeleteObject(hPen);
 }
 void DrawFuel(HDC hdc, int x, int y)
 {
@@ -476,58 +561,42 @@ void DrawFuel(HDC hdc, int x, int y)
     HPEN hPen2 = CreatePen(PS_SOLID, 1, RGB(142, 28, 36));
     HBRUSH hBrush = CreateSolidBrush(RGB(255, 127, 39));
 
-    //координаты всей бочки (822, 156, 901, 283)
+    
+    //координаты всей бочки (862, 173, 901, 223)
 
     SelectObject(hdc, hPen);
-    Ellipse(hdc, 822 + x, 156 + y, 902 + x, 187 + y);   //обод бочки
+    Ellipse(hdc, 862 + x, 163 + y, 901 + x, 180 + y);   //обод бочки
 
     MoveToEx(hdc, 901 + x, 173 + y, 0);
-    LineTo(hdc, 901 + x, 283 + y);
-    LineTo(hdc, 823 + x, 283 + y);          //обводка корпуса
-    LineTo(hdc, 823 + x, 173 + y);
+    LineTo(hdc, 901 + x, 223 + y);
+    LineTo(hdc, 862 + x, 223 + y);          //обводка корпуса
+    LineTo(hdc, 862 + x, 173 + y);
 
     SelectObject(hdc, hPen1);
     POINT pt[4];
-    pt[0].x = 827 + x;
-    pt[1].x = 827 + x;
-    pt[2].x = 896 + x;
-    pt[3].x = 896 + x;
+    pt[0].x = 898 + x;
+    pt[1].x = 898 + x;
+    pt[2].x = 865 + x;
+    pt[3].x = 865 + x;
     //заливка корпуса
-    pt[0].y = 190 + y;
-    pt[1].y = 278 + y;
-    pt[2].y = 278 + y;
-    pt[3].y = 190 + y;
+    pt[0].y = 180 + y;
+    pt[1].y = 220 + y;
+    pt[2].y = 220 + y;
+    pt[3].y = 180 + y;
     Polygon(hdc, pt, 4);
 
     SelectObject(hdc, hPen1);
 
-    int x1 = 896 + x, x2 = 901 - 27 + x, yf = 189 + y;
-    while (yf >= 183 + y)
-    {
-        MoveToEx(hdc, x1, yf, 0);
-        LineTo(hdc, x2, yf);
-        x2 += 2;
-        yf--;
-    }           //дозаливка справа
+    int perX = 24;
+    int perY = -35;
 
-    SelectObject(hdc, hPen1);
-
-    x1 = 896 + x, x2 = 901 - 27 + x, yf = 189 + y;
-    while (yf >= 183 + y)
-    {
-        MoveToEx(hdc, x1 - 48, yf, 0);
-        LineTo(hdc, x2 - 48, yf);
-        x1 -= 2;
-        yf--;
-    }       //дозаливка слева
-
-    RECT rect1 = { 855 + x, 254 + y, 863 + x, 252 + y };
-    RECT rect2 = { 848 + x, 252 + y, 868 + x, 248 + y };
-    RECT rect3 = { 845 + x, 248 + y, 872 + x, 233 + y };
-    RECT rect4 = { 848 + x, 233 + y, 868 + x, 227 + y };
-    RECT rect5 = { 868 + x, 227 + y, 868 - 3 + x, 227 - 3 + y };
-    RECT rect6 = { 852 + x, 237 + y, 865 + x, 222 + y };
-    RECT rect7 = { 855 + x, 222 + y, 865 + x, 217 + y };
+    RECT rect1 = { 855 + perX + x, 254 + perY + y, 863 + perX + x, 252 + perY + y };
+    RECT rect2 = { 848 + perX + x, 252 + perY + y, 868 + perX + x, 248 + perY + y };
+    RECT rect3 = { 845 + perX + x, 248 + perY + y, 872 + perX + x, 233 + perY + y };
+    RECT rect4 = { 848 + perX + x, 233 + perY + y, 868 + perX + x, 227 + perY + y };
+    RECT rect5 = { 868 + perX + x, 227 + perY + y, 868 + perX - 3 + x, 227 + perY - 3 + y };
+    RECT rect6 = { 852 + perX + x, 237 + perY + y, 865 + perX + x, 222 + perY + y };
+    RECT rect7 = { 855 + perX + x, 222 + perY + y, 865 + perX + x, 217 + perY + y };
 
     FillRect(hdc, &rect1, hBrush);
     FillRect(hdc, &rect2, hBrush);
@@ -536,49 +605,84 @@ void DrawFuel(HDC hdc, int x, int y)
     FillRect(hdc, &rect5, hBrush);
     FillRect(hdc, &rect6, hBrush);
     FillRect(hdc, &rect7, hBrush);
+
+    DeleteObject(hPen);
+    DeleteObject(hPen1);
+    DeleteObject(hPen2);
+    DeleteObject(hBrush);
 }
+
+void DrawFuels(HDC hdc) {
+
+    for (int i = 0; i < NUM_FUEL; i++)
+    {
+        if (FuelVisible[i])
+            DrawFuel(hdc, FuelX[i], FuelY[i]);
+    }
+}//если гриб не съеден - рисуем
+void DrawWrenchs(HDC hdc) {
+
+    for (int i = 0; i < NUM_WRENCHE; i++)
+    {
+        if (WrencheVisible[i]) {
+            DrawWrench(hdc, WrencheX[i], WrencheY[i]);
+        }
+    }
+}
+
+
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        srand(time(0));
+        SetTimer(hWnd, 1, 1000, 0);
+        break;
+    case WM_TIMER:
+        RandomMoveCar();
+        TryToEatRacingCar();
+        if (RacingCarHelth == 0)
+            PostQuitMessage(0);
+
+        InvalidateRect(hWnd, NULL, TRUE);
+        break;
     case WM_KEYDOWN:
         switch (wParam)
         {
         case VK_LEFT:
             Racing_x -= 10;
             koorRacing_x -= 10;
-            if (Refueled()) {
-                PostQuitMessage(0);
-            }
+          
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_RIGHT:
             Racing_x += 10;
             koorRacing_x += 10;
 
-            if (Refueled()) 
-                PostQuitMessage(0);
-            
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_DOWN:
             Racing_y += 10;
             koorRacing_y += 10;
-            if (Refueled()) {
-                PostQuitMessage(0);
-            }
+         
             InvalidateRect(hWnd, 0, 1);
             break;
         case VK_UP:
             Racing_y -= 10;
             koorRacing_y -= 10;
-            if (Refueled()) {
-                PostQuitMessage(0);
-            }
+            
             InvalidateRect(hWnd, 0, 1);
             break;
         }
+        Refueled();
+        if (CountVisibleFuel() == 0)
+            PostQuitMessage(0);
+        Repair();
+        break;
+
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
@@ -600,16 +704,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
+
+        DrawFuels(hdc);
+
         DrawRacingCar(hdc, Racing_x, Racing_y);
 
-        DrawCar(hdc, 0, 0);
+        DrawCar(hdc, Car_x, Car_y);
 
-        DrawRam(hdc, 0, 0);
+        //DrawRam(hdc, 0, 0);
 
-        DrawWrench(hdc, 0, 0);
-
-        
-        DrawFuel(hdc, 0, 0);
+        DrawWrenchs(hdc);
 
         EndPaint(hWnd, &ps);
     }
